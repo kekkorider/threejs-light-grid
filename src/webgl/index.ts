@@ -55,7 +55,7 @@ await modules.assetLoader.loadKTX('/2d_etc1s.ktx2', {
 //
 // Camera
 //
-camera.position.set(0, 0, 5)
+camera.position.set(0, 0, 5.5)
 
 await renderer.computeAsync(computeInit)
 const geometry = new THREE.PlaneGeometry(10, 10, 10, 10).rotateX(-Math.PI / 2)
