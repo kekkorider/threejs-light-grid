@@ -15,7 +15,9 @@ import { AssetLoaderModule } from './modules/AssetLoader'
 import { OrbitControlsModule } from './modules/OrbitControls'
 import { InspectorModule } from './modules/Inspector'
 
-import { GridMaterial } from './materials/grid'
+import { GridMaterial, computeInit, computeUpdate } from './materials/grid'
+
+import { GRID_COUNT } from './constants'
 
 //
 // Setup
@@ -53,11 +55,16 @@ await modules.assetLoader.loadKTX('/2d_etc1s.ktx2', {
 //
 // Camera
 //
-camera.position.set(0, 1, 5)
+camera.position.set(0, 0, 5)
 
+await renderer.computeAsync(computeInit)
 const geometry = new THREE.PlaneGeometry(10, 10, 10, 10).rotateX(-Math.PI / 2)
-const mesh = new THREE.Mesh(geometry, GridMaterial)
+const mesh = new THREE.InstancedMesh(geometry, GridMaterial, GRID_COUNT)
 scene.add(mesh)
+
+starter.ctx.on(ThreeContextEvents.Update, async () => {
+  await renderer.computeAsync(computeUpdate)
+})
 
 //
 // Post-processing and Inspector

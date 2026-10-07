@@ -3,7 +3,7 @@ import { Inspector } from 'three/addons/inspector/Inspector.js'
 
 import type { ParametersGroup } from "three/examples/jsm/inspector/tabs/Parameters.js"
 
-import { GridMaterial, size, thickness } from '../materials/grid'
+import { GridMaterial, count, thickness } from '../materials/grid'
 
 export class InspectorModule extends ContextModule {
   inspector!: Inspector
@@ -14,7 +14,7 @@ export class InspectorModule extends ContextModule {
 
     this.gui = this.inspector.createParameters('Settings')
     this.gui.add(GridMaterial, 'wireframe').name('Wireframe')
-    this.gui.add(size, 'value', 2, 20, 1).name('Size')
+    this.gui.add(count, 'value', 2, 20, 2).name('Count')
     this.gui.add(thickness, 'value', 0.01, 1, 0.01).name('Thickness')
   }
 }
