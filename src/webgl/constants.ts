@@ -1,1 +1,1 @@
-export const GRID_COUNT = 22
+export const GRID_COUNT = 14

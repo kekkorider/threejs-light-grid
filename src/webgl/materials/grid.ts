@@ -20,14 +20,15 @@ import {
 
 import { GRID_COUNT } from '../constants'
 
-export const count = uniform(10)
+export const count = uniform(18)
 export const thickness = uniform(0.015)
 export const colorsPool = uniformArray([
-  new Color(0xff1234),
-  new Color(0x1234ff),
+  new Color(0x14fbff),
+  new Color(0xff14a9),
   new Color(0x34ff12)
 ], 'color')
-export const strength = uniform(1)
+export const strength = uniform(3)
+export const speed = uniform(0.3)
 
 const positions = instancedArray(GRID_COUNT, 'vec3')
 const originalPositions = instancedArray(GRID_COUNT, 'vec3')
@@ -60,12 +61,6 @@ export const computeInit = Fn(() => {
 
   pos.assign(origin)
   originalPositions.element(idx).assign(origin)
-
-  // colors.element(idx)
-  //   .assign(
-  //     colorsPool.element(idx.mod(colorsPool.array.length)
-  //   )
-  // )
 })().compute(GRID_COUNT)
 
 export const computeUpdate = Fn(() => {
@@ -76,7 +71,7 @@ export const computeUpdate = Fn(() => {
   If(idx.greaterThanEqual(HALF_TOTAL), () => {
     const originalZ = originalPos.z.toVar()
     const z = originalZ
-                .add(time.mul(0.25))
+                .add(time.mul(speed))
                 .mod(HALF_TOTAL)
                 .sub(HALF_TOTAL.div(2))
 
@@ -94,24 +89,24 @@ const Grid = Fn(([_coords, _count]: [Node<'vec2'>, Node<'float'>]) => {
 GridMaterial.colorNode = Fn(() => {
   const idx = instanceIndex.toFloat()
   const color = colorsPool.element(idx.mod(colorsPool.array.length))
-  return color.pow(strength)
+  return color.add(color.pow(strength))
 })()
 
 GridMaterial.opacityNode = Fn(() => {
   const idx = instanceIndex.toFloat()
   const pos = positions.element(idx)
 
-  const back = pos.z.smoothstep(-5, -4)
-  const front = pos.z.smoothstep(5, 4)
+  const back = pos.z.smoothstep(HALF_TOTAL.div(2).negate(), HALF_TOTAL.div(2).sub(0.5).negate())
+  const front = pos.z.smoothstep(HALF_TOTAL.div(2), HALF_TOTAL.div(2).sub(0.5))
 
   const grid = Grid(uv(), count)
 
   const noise = mx_fractal_noise_float(
                   positionLocal
-                    .add(pos)
-                    .mul(2)
+                    .add(pos.xy)
+                    .mul(1.3)
                     .add(time.mul(0.3)),
-                    0.95
+                    0.6
                 )
                 .smoothstep(0.35, 0.6)
 

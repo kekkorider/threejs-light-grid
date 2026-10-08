@@ -7,9 +7,13 @@ import {
   normalView,
 } from 'three/tsl'
 import {
+  addComponent,
   ThreeContextEvents,
   ThreeStart,
 } from "three-start"
+import { bloom } from 'three/addons/tsl/display/BloomNode.js'
+
+import { Spin } from './behaviors/Spin'
 
 import { AssetLoaderModule } from './modules/AssetLoader'
 import { OrbitControlsModule } from './modules/OrbitControls'
@@ -55,12 +59,13 @@ await modules.assetLoader.loadKTX('/2d_etc1s.ktx2', {
 //
 // Camera
 //
-camera.position.set(0, 0, 5.5)
+camera.position.set(-0.5, 1, 5.5)
 
 await renderer.computeAsync(computeInit)
 const geometry = new THREE.PlaneGeometry(10, 10, 10, 10).rotateX(-Math.PI / 2)
 const mesh = new THREE.InstancedMesh(geometry, GridMaterial, GRID_COUNT)
 scene.add(mesh)
+addComponent(mesh, Spin, { axis: 'z', speed: 0.1 })
 
 starter.ctx.on(ThreeContextEvents.Update, async () => {
   await renderer.computeAsync(computeUpdate)
@@ -79,6 +84,9 @@ function createPostProcessing(): void {
   )
 
   const scenePassColor = scenePass.getTextureNode('output').toInspector('Output')
+  const bloomPass = bloom(scenePassColor, 0.97, 0.01, 0.39).toInspector('Bloom')
+
+  modules.inspector.createBloom(bloomPass)
   // const scenePassDepth = scenePass.getTextureNode('depth').toInspector('Depth', () => scenePass.getLinearDepthNode())
   // const scenePassNormal = scenePass.getTextureNode('normal').toInspector('Normal')
   // const scenePassVelocity = scenePass.getTextureNode('velocity').toInspector('Velocity')
@@ -91,5 +99,5 @@ function createPostProcessing(): void {
   //   return out
   // })
 
-  renderPipeline.outputNode = scenePassColor
+  renderPipeline.outputNode = scenePassColor.add(bloomPass)
 }
